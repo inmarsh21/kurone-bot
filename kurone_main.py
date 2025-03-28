@@ -15,6 +15,7 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 @app.route("/callback", methods=['POST'])
+
 def callback():
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
@@ -23,6 +24,10 @@ def callback():
     except InvalidSignatureError:
         abort(400)
     return "OK"
+
+@app.route("/")
+def home():
+    return "クロネ占いBotは動作中やで。LINEからメッセージ送ってや！"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
@@ -40,7 +45,11 @@ user_inputs = {}
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FlexSendMessage
 
 @handler.add(MessageEvent, message=TextMessage)
-@handler.add(MessageEvent, message=TextMessage)
+
+def handle_message(event):
+    print("✅ メッセージ受信:", event.message.text)
+
+
 def handle_message(event):
     user_id = event.source.user_id
     msg = event.message.text
@@ -69,7 +78,7 @@ def handle_message(event):
             reply = "クロネ：相性ぃ？ …知ってどうすんだよ。ま、いいけどな。まずはあんたの名前は？"
         elif msg in ["2", "タロット", "tarot"]:
             user_states[user_id] = "tarot"
-            reply = "クロネ：タロットな…。オレの引きが冴えてるかどうか、試すってわけか。" + run_tarot_auto(user_id)
+            reply = "クロネ：タロットな…。オレの引きが冴えてるかどうか、試すってわけか。\n" + kurone_tarot_reading()
         elif msg in ["3", "カラー", "ラッキーカラー", "色"]:
             user_states[user_id] = "lucky"
             reply = "クロネ：色ぉ？ …そういうの気にするタイプかよ。" + run_lucky_color(user_id)
@@ -159,18 +168,8 @@ if __name__ == "__main__":
 
     # ※ 他のステート（ask_name以降）は別途追記する
 
-else:
-        reply = (
-            "クロネ：……ったく、わかんねーなら最初から『占って』って言えよな。"
-        )
 
-        line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=reply)
-    )
-@app.route("/")
-def home():
-    return "クロネ占いBotは動作中やで。LINEからメッセージ送ってや！"
+
 
 
 # ==========================
