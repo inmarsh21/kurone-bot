@@ -32,6 +32,14 @@ line_bot_api = MessagingApi(config)  # ← ここ！
 # Webhookハンドラ
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
+from linebot.v3.webhooks import MessageEvent
+
+@handler.add(MessageEvent)
+def debug_handler(event):
+    print("📩 イベントきたで！")
+    print("🧾 イベントタイプ:", type(event))
+    print("🧾 内容:", event)
+
 # ステート管理辞書
 user_states = {}
 
