@@ -1,4 +1,5 @@
 from flask import Flask, request, abort
+import os
 from linebot.v3.messaging import (
     Configuration,
     MessagingApi,
@@ -11,8 +12,8 @@ from linebot.exceptions import InvalidSignatureError
 
 app = Flask(__name__)
 
-LINE_CHANNEL_ACCESS_TOKEN = 'YOUR_ACCESS_TOKEN'
-LINE_CHANNEL_SECRET = 'YOUR_CHANNEL_SECRET'
+LINE_CHANNEL_ACCESS_TOKEN = 'tIyCE/XnhmCgdICOzqeU89R9MSi6j/AgbwaRGU+Dj4xlzDsw1sMJVC0MXL0X6dpOxid9jV2xU2OG1jVBpVCXTjEDKx44qH/yLLL8S4OWR6hsTYRqEusE/28rZSWntOuuROjtRo0H4N+XPj4mrIUoIQdB04t89/1O/w1cDnyilFU='
+LINE_CHANNEL_SECRET = '4dc62a09bfc7d5f785dbba1538a0483b'
 
 config = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 line_bot_api = MessagingApi(config)
@@ -30,7 +31,6 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
-    user_message = event.message.text
     reply = "クロネ：呼んだか？…なんだ、お前かよ。"
     line_bot_api.reply_message(
         ReplyMessageRequest(
@@ -44,4 +44,6 @@ def home():
     return "クロネBotはv3で動作中やで！"
 
 if __name__ == "__main__":
-    app.run(port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
