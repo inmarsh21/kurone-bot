@@ -553,19 +553,20 @@ def get_today_str():
 # ⑥ ログ・デバッグ表示（ステート確認など）
 # ==========================
 
-@handler.add(MessageEvent, message=TextMessage)
-def test_debug_message(event):
-    print("✅ デバッグ: handle_message が呼ばれた！")
+from linebot.v3.webhooks import TextMessageContent
+
+@handler.add(MessageEvent, message=TextMessageContent)
+def handle_message(event):
+    print("📩 メッセージイベント受信！")
+    print("▶ user_id:", event.source.user_id)
+    print("▶ text:", event.message.text)
+    
     line_bot_api.reply_message(
         ReplyMessageRequest(
             reply_token=event.reply_token,
-            messages=[TextMessage(text="テスト返信やで")]
+            messages=[TextMessage(text="デバッグ返信：受け取ったで！")]
         )
     )
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
 
 
 # ==========================
