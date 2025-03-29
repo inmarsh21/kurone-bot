@@ -3,6 +3,7 @@ import os
 from linebot.v3.messaging import (
     Configuration,
     MessagingApi,
+    ApiClient,
     TextMessage,
     ReplyMessageRequest
 )
@@ -16,7 +17,8 @@ LINE_CHANNEL_ACCESS_TOKEN = 'tIyCE/XnhmCgdICOzqeU89R9MSi6j/AgbwaRGU+Dj4xlzDsw1sM
 LINE_CHANNEL_SECRET = '4dc62a09bfc7d5f785dbba1538a0483b'
 
 config = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
-line_bot_api = MessagingApi(config)
+api_client = ApiClient(config)
+line_bot_api = MessagingApi(api_client)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 @app.route("/callback", methods=["POST"])
