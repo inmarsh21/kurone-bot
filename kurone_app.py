@@ -31,16 +31,31 @@ def callback():
         abort(400)
     return "OK"
 
-@handler.add(MessageEvent, message=TextMessageContent)
+@handler.add(MessageEvent)
 def handle_message(event):
-    reply = "クロネ：呼んだか？…なんだ、お前かよ。"
+    if not isinstance(event.message, TextMessageContent):
+        return
+
+    user_message = event.message.text.strip()
+    reply_text = ""
+
+    if user_message in ["こんにちは", "やあ", "よお", "ハロー"]:
+        reply_text = "呼んだか？…なんだ、お前かよ。"
+    elif "占って" in user_message:
+        reply_text = (
+            "しゃーねぇな。何を占えばいいんだよ？\n"
+            "【1】相性診断\n【2】タロット\n【3】ラッキーカラー\n"
+            "番号でも、名前でも言えや。"
+        )
+    else:
+        reply_text = "…なんや、用がないなら呼ばんといてくれや。"
+
     line_bot_api.reply_message(
         ReplyMessageRequest(
             reply_token=event.reply_token,
-            messages=[TextMessage(text=reply)]
+            messages=[TextMessage(text=reply_text)]
         )
     )
-
 @app.route("/")
 def home():
     return "クロネBotはv3で動作中やで！"
