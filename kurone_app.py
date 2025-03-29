@@ -2,7 +2,6 @@
 # ==========================
 # 🧩 Flask + LINE Webhook連携
 # ==========================
-
 from flask import Flask, request, abort
 import os
 import random
@@ -26,15 +25,16 @@ app = Flask(__name__)
 LINE_CHANNEL_ACCESS_TOKEN = 'tIyCE/xxxxxx...省略...'
 LINE_CHANNEL_SECRET = '4dc62a09bfc7d5f785dbba1538a0483b'
 
-# ✅ v3対応のMessagingApi初期化（← ここがポイント！）
+# ✅ v3対応のMessagingApi初期化（←ここだけ修正）
 config = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
-line_bot_api = MessagingApi(configuration=config)
+line_bot_api = MessagingApi(config)  # ← ここ！
 
 # Webhookハンドラ
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 # ステート管理辞書
 user_states = {}
+
 
 
 @app.route("/callback", methods=["POST"])
