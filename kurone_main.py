@@ -3,36 +3,55 @@
 # ==========================
 
 from flask import Flask, request, abort
-from linebot import LineBotApi, WebhookHandler
-from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+import os
 import random
 
+from linebot.v3.messaging import (
+    MessagingApi,
+    Configuration,
+    ReplyMessageRequest,
+    TextMessage,
+    FlexMessage  # ←これ追加！
+)
+
+from linebot.v3.webhook import WebhookHandler
+from linebot.v3.webhooks import MessageEvent
+from linebot.exceptions import InvalidSignatureError
+
 app = Flask(__name__)
-LINE_CHANNEL_ACCESS_TOKEN = 'Hkx9c2oPZcxHPWVJ0NwAKYcby9aZ92mflJh/tH+WUPBDMJkqchr0oheJuGEvC7NHxid9jV2xU2OG1jVBpVCXTjEDKx44qH/yLLL8S4OWR6hx4cbF/k3ExRwIVtZdUY8rNN5zSKSlx50RKDkOwhgvPAdB04t89/1O/w1cDnyilFU='
+
+# LINE APIの認証情報（セキュリティ的には環境変数推奨）
+LINE_CHANNEL_ACCESS_TOKEN = 'tIyCE/XnhmCgdICOzqeU89R9MSi6j/AgbwaRGU+Dj4xlzDsw1sMJVC0MXL0X6dpOxid9jV2xU2OG1jVBpVCXTjEDKx44qH/yLLL8S4OWR6hsTYRqEusE/28rZSWntOuuROjtRo0H4N+XPj4mrIUoIQdB04t89/1O/w1cDnyilFU='
 LINE_CHANNEL_SECRET = '4dc62a09bfc7d5f785dbba1538a0483b'
-line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
+
+# v3対応LINE Bot初期化
+config = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
+line_bot_api = MessagingApi(configuration=config)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-@app.route("/callback", methods=['POST'])
+user_states = {}
 
+@app.route("/callback", methods=["POST"])
 def callback():
-    signature = request.headers['X-Line-Signature']
+    signature = request.headers["X-Line-Signature"]
     body = request.get_data(as_text=True)
+
+    print("🟡 受信したbody:", body)
+
     try:
         handler.handle(body, signature)
+        print("🟢 handler.handle() 成功！")
     except InvalidSignatureError:
+        print("❌ シグネチャエラー：Token/Secret違いかも")
         abort(400)
+    except Exception as e:
+        print("💥 その他のエラー:", e)
+
     return "OK"
 
 @app.route("/")
 def home():
-    return "クロネ占いBotは動作中やで。LINEからメッセージ送ってや！"
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
-
-
+    return "クロネ占いBotはv3で動作中やで。LINEから『占って』って送ってな！"
 
 # ==========================
 # ① 会話ロジック（ユーザーとの対話・ステート管理）
@@ -42,14 +61,10 @@ user_states = {}
 user_inputs = {}
 
 
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, FlexSendMessage
 
-@handler.add(MessageEvent, message=TextMessage)
-
+@handler.add(MessageEvent)
 def handle_message(event):
-    print("✅ メッセージ受信:", event.message.text)
-
-
+    print("🔔 handle_message呼ばれた")
 def handle_message(event):
     user_id = event.source.user_id
     msg = event.message.text
@@ -57,8 +72,22 @@ def handle_message(event):
     reply = ""
 
     if "占い" in msg:
-        message = FlexSendMessage(alt_text="占い結果", contents={"type": "bubble", "body": {"type": "box", "layout": "vertical", "contents": [{"type": "text", "text": "占い結果をここに表示"}]}})
-        line_bot_api.reply_message(event.reply_token, message)
+        flex_contents = {
+            "type": "bubble",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {"type": "text", "text": "占い結果をここに表示"}
+                ]
+            }
+        }
+        line_bot_api.reply_message(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[FlexMessage(alt_text="占い結果", contents=flex_contents)]
+            )
+        )
         return
 
     if msg in ["占って", "うらない", "start"]:
@@ -160,10 +189,16 @@ def handle_message(event):
     else:
         reply = "クロネ：……ったく、わかんねーなら最初から『占って』って言えよな。"
 
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
+    line_bot_api.reply_message(
+        ReplyMessageRequest(
+            reply_token=event.reply_token,
+            messages=[TextMessage(text=reply)]
+        )
+    )
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
 
 
     # ※ 他のステート（ask_name以降）は別途追記する
@@ -428,7 +463,7 @@ def create_tarot_flex():
         "contents": bubbles
     }
 
-    return FlexSendMessage(alt_text="クロネのタロット占い結果", contents=flex)
+    return FlexMessage(alt_text="クロネのタロット占い結果", contents=flex)
 
 # ----- 🌈 ラッキーカラー占い -----
 lucky_colors = [
@@ -550,5 +585,3 @@ def get_today_str():
 
 # def save_result_to_db(user_id, result):
 #     pass  # TODO: 実装予定
-
-
