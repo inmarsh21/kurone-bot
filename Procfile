@@ -1,1 +1,1 @@
-web: python kurone_app.py
+web:python kurone_app.py
