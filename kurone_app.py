@@ -22,7 +22,7 @@ from linebot.exceptions import InvalidSignatureError
 app = Flask(__name__)
 
 # LINE APIの認証情報（セキュリティ的には本来は環境変数が推奨）
-LINE_CHANNEL_ACCESS_TOKEN = 'tIyCE/xxxxxx...省略...'
+LINE_CHANNEL_ACCESS_TOKEN = 'Hkx9c2oPZcxHPWVJ0NwAKYcby9aZ92mflJh/tH+WUPBDMJkqchr0oheJuGEvC7NHxid9jV2xU2OG1jVBpVCXTjEDKx44qH/yLLL8S4OWR6hx4cbF/k3ExRwIVtZdUY8rNN5zSKSlx50RKDkOwhgvPAdB04t89/1O/w1cDnyilFU='
 LINE_CHANNEL_SECRET = '4dc62a09bfc7d5f785dbba1538a0483b'
 
 # ✅ v3対応のMessagingApi初期化（←ここだけ修正）
