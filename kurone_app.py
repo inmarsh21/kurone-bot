@@ -39,28 +39,34 @@ def handle_message(event):
     user_message = event.message.text.strip()
     reply_text = ""
 
-    # 挨拶系
-    if user_message in ["こんにちは", "やあ", "よお", "ハロー"]:
-        reply_text = random.choice(greeting_variants)
+    # 占いワード
+    fortune_keywords = ["占って", "占い", "うらない", "占", "占い頼む"]
 
-    # 占いキーワード
-    elif any(keyword in user_message for keyword in ["占って", "占い", "うらない", "占いして", "占い頼む"]):
+    # ネガティブ系ワード
+    worry_keywords = ['つらい', 'しんどい', '不安', 'どうしよう', '疲れた', '最悪', '無理', '助けて', '泣きそう', 'うまくいかない','嫌']
+
+    # メッセージ分岐
+    if any(keyword in user_message for keyword in fortune_keywords):
+        # 占い対応
         reply_text = (
-            "しゃーねぇな。何を占えばいいんだよ？\n"
+            "占いか。ったく、いちいち面倒くせぇな。\n"
+            "でもどうせお前、気になってんだろ？\n"
+            "ほら、何占うんだよ。\n"
             "【1】相性診断\n【2】タロット\n【3】ラッキーカラー\n"
-            "番号でも、名前でも言えや。"
+            "番号でも単語でもさっさと言え。"
         )
 
-    # ネガティブ・悩みっぽいキーワード
     elif any(w in user_message for w in worry_keywords):
+        # ネガティブ系対応（共感）
         reply_text = (
-            "ったく…いきなりそんなテンションで話しかけてくんなよな。\n"
-            "まぁ…オレが出てきたってことは、アンタ相当ヤバいってことや。\n"
-            "しゃーない、ちょっとだけ占ってやるから、覚悟しとけよ。"
+            "はぁ…お前、いきなり重てぇんだよ。\n"
+            "全部どうでもよくなってんだろ？顔に書いてあるぞ。\n"
+            "しょうがねぇから少しだけ相手してやる。感謝しろ。"
         )
 
     else:
-        reply_text = "…なんや、用がないなら呼ばんといてくれや。"
+        # それ以外は、雑に対応（greeting_variants から選択）
+        reply_text = random.choice(greeting_variants)
 
     line_bot_api.reply_message(
         ReplyMessageRequest(
