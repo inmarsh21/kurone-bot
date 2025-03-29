@@ -29,6 +29,8 @@ greeting_variants = [
     "……眠いんだけど。"
 ]
 
+worry_keywords = ['つらい', 'しんどい', '不安', 'どうしよう', '疲れた', '最悪', '無理', '助けて', '泣きそう', 'うまくいかない']
+
 @handler.add(MessageEvent)
 def handle_message(event):
     if not isinstance(event.message, TextMessageContent):
@@ -37,14 +39,24 @@ def handle_message(event):
     user_message = event.message.text.strip()
     reply_text = ""
 
+    # 挨拶系
     if user_message in ["こんにちは", "やあ", "よお", "ハロー"]:
         reply_text = random.choice(greeting_variants)
 
+    # 占いキーワード
     elif any(keyword in user_message for keyword in ["占って", "占い", "うらない", "占いして", "占い頼む"]):
         reply_text = (
             "しゃーねぇな。何を占えばいいんだよ？\n"
             "【1】相性診断\n【2】タロット\n【3】ラッキーカラー\n"
             "番号でも、名前でも言えや。"
+        )
+
+    # ネガティブ・悩みっぽいキーワード
+    elif any(w in user_message for w in worry_keywords):
+        reply_text = (
+            "ったく…いきなりそんなテンションで話しかけてくんなよな。\n"
+            "まぁ…オレが出てきたってことは、アンタ相当ヤバいってことや。\n"
+            "しゃーない、ちょっとだけ占ってやるから、覚悟しとけよ。"
         )
 
     else:
