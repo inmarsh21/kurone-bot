@@ -1,5 +1,6 @@
 from flask import Flask, request, abort
 import os
+import random
 from linebot.v3.messaging import (
     Configuration,
     MessagingApi,
@@ -21,15 +22,12 @@ api_client = ApiClient(config)
 line_bot_api = MessagingApi(api_client)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-@app.route("/callback", methods=["POST"])
-def callback():
-    signature = request.headers["X-Line-Signature"]
-    body = request.get_data(as_text=True)
-    try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
-    return "OK"
+greeting_variants = [
+    "呼んだか？…なんだ、お前かよ。",
+    "オレが出るってことは、どうせヒマなんやろ。",
+    "ったく…用事もないのに呼ぶなよな。",
+    "……眠いんだけど。"
+]
 
 @handler.add(MessageEvent)
 def handle_message(event):
@@ -40,13 +38,15 @@ def handle_message(event):
     reply_text = ""
 
     if user_message in ["こんにちは", "やあ", "よお", "ハロー"]:
-        reply_text = "呼んだか？…なんだ、お前かよ。"
-    elif "占って" in user_message:
+        reply_text = random.choice(greeting_variants)
+
+    elif any(keyword in user_message for keyword in ["占って", "占い", "うらない", "占いして", "占い頼む"]):
         reply_text = (
             "しゃーねぇな。何を占えばいいんだよ？\n"
             "【1】相性診断\n【2】タロット\n【3】ラッキーカラー\n"
             "番号でも、名前でも言えや。"
         )
+
     else:
         reply_text = "…なんや、用がないなら呼ばんといてくれや。"
 
@@ -56,6 +56,17 @@ def handle_message(event):
             messages=[TextMessage(text=reply_text)]
         )
     )
+
+@app.route("/callback", methods=["POST"])
+def callback():
+    signature = request.headers["X-Line-Signature"]
+    body = request.get_data(as_text=True)
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+    return "OK"
+
 @app.route("/")
 def home():
     return "クロネBotはv3で動作中やで！"
@@ -63,4 +74,3 @@ def home():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
