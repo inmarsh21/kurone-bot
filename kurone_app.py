@@ -66,7 +66,7 @@ def home():
 user_states = {}
 user_inputs = {}
 
-
+@handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_id = event.source.user_id
     msg = event.message.text
