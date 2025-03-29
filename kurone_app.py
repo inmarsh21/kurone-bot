@@ -557,3 +557,7 @@ def get_today_str():
 
 # def save_result_to_db(user_id, result):
 #     pass  # TODO: 実装予定
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
