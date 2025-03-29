@@ -1,0 +1,1 @@
+web: python kurone_main.py
