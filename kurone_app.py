@@ -71,7 +71,17 @@ def handle_message(event):
     user_id = event.source.user_id
     msg = event.message.text
     state = user_states.get(user_id, "start")
-    reply = ""
+    reply = "クロネ：……ったく、何が言いたいんだか"
+
+    print("✅ handle_message() 呼び出されたで！")
+
+    line_bot_api.reply_message(
+        ReplyMessageRequest(
+            reply_token=event.reply_token,
+            messages=[TextMessage(text=reply)]
+        )
+    )
+
 
     if "占い" in msg:
         return
