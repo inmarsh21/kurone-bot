@@ -553,10 +553,19 @@ def get_today_str():
 # ⑥ ログ・デバッグ表示（ステート確認など）
 # ==========================
 
-# 開発中はここにログ出力、RenderのLogsで確認しやすく
-# 本番時はコメントアウトOK
+@handler.add(MessageEvent, message=TextMessage)
+def test_debug_message(event):
+    print("✅ デバッグ: handle_message が呼ばれた！")
+    line_bot_api.reply_message(
+        ReplyMessageRequest(
+            reply_token=event.reply_token,
+            messages=[TextMessage(text="テスト返信やで")]
+        )
+    )
 
-# log_state(user_id, user_states[user_id])
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
 
 
 # ==========================
